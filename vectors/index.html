@@ -1,11 +1,23 @@
 <!DOCTYPE html>
 <html lang="ca">
 <head>
+    <!--Conté la informació pel programador i és obligatori la secció head-->
 <meta charset="UTF-8">
+    <!-- És un document html escrit en catala i mab un conjunt de caràcter UTF-8 perquè accepti el accents i ç-->
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- La línia anterion és una metainformació pel programador que indica que el contingut s'adapti al ample de la pantalla-->
 <title>Suma de Vectors Nàutics: Vaixell, Vent i Corrent</title>
+    <!--Title és el títol de la pestanya del navegador no del document-->
 <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-<style>
+    <!--Aquest codi afegeix una biblioteca externa CDN (Conent Deliveri Network) que es de tipus javascript
+    perquè acaba en script. Cada biblioteca externa serveix per una cosa. La biblioteca mathjax serveix per escriure
+    formules matemàtiques i caràcters matemàtic. Altres biblioteques que utilitzarem durant el curs per exemple bootstrap5 per els menus desplegables,
+    font awesome per dibuixar simbols predissenyats que es troben en el menús desplegables, p5.js és una bibloteca que serveix per
+    dbuixar de forma fàcil i ràpida, ml5.js significa machine learning o aprenentatge per màquina i ens pot servir per reconeixer cares, gestos,
+    poses... Els número 5 prové de processing  o proce55ing que és com es deia el antecessor d'aquest programa. Processing és anterior a arduino
+    i arduino deriva d'ell. Podem fer robòtica emprant en llenguatge <a href="https://processing.org"> processing <a/> amb la bibloteca arduino.-->
+    <style>
     body {
         font-family: Arial, sans-serif;
         margin: 20px;
@@ -42,17 +54,17 @@
 <p>Introdueix els vectors (rumb en graus i velocitat en nusos) i clica "Calcula".</p>
 <div>
     <h2>Vector del Vaixell (\( \vec{V} \))</h2>
-    Rumb: <input type="number" id="vRumb" value="146">° 
+    Rumb: <input type="number" id="vRumb" value="146">°
     Velocitat: <input type="number" id="vVel" value="10"> nusos
 </div>
 <div>
     <h2>Vector del Vent (\( \vec{W} \))</h2>
-    Rumb: <input type="number" id="wRumb" value="240">° 
+    Rumb: <input type="number" id="wRumb" value="240">°
     Velocitat: <input type="number" id="wVel" value="5"> nusos
 </div>
 <div>
     <h2>Vector del Corrent (\( \vec{C} \))</h2>
-    Rumb: <input type="number" id="cRumb" value="30">° 
+    Rumb: <input type="number" id="cRumb" value="30">°
     Velocitat: <input type="number" id="cVel" value="3"> nusos
 </div>
 <button onclick="calculaVectors()">Calcula</button>
@@ -153,4 +165,3 @@ function calculaVectors() {
 </script>
 </body>
 </html>
-
