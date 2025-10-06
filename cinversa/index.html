@@ -3,101 +3,182 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cinemàtica inversa d'un robot de dos braços</title>
+  <title>Càlcul de la posició i cinemàtica inversa d'un robot</title>
   <script type="text/javascript" async
-    src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.0/es5/tex-mml-chtml.js">
-  </script>
+    src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.0/es5/tex-mml-chtml.js"></script>
   <style>
-    body { font-family: Arial, sans-serif; margin: 20px; }
-    .equation { margin: 20px 0; }
-    #output, #robotCanvas { display: none; }
-    canvas { border: 1px solid black; }
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    .equation {
+      margin: 20px 0;
+    }
+    .results {
+      font-weight: bold;
+    }
+    /* Oculta els elements de sortida per defecte */
+    #output, #robotCanvas {
+      display: none;
+    }
+    canvas {
+      border: 1px solid black;
+    }
   </style>
 </head>
 <body>
 
-<h1>Cinemàtica inversa d’un robot amb dos braços</h1>
+  <h1>Càlcul de la posició i cinemàtica inversa d'un robot amb dos braços</h1>
 
-<div>
-  <label for="a1">Longitud del primer braç (a₁):</label>
-  <input type="number" id="a1" value="1" step="0.1"><br><br>
+  <h2>Cinemàtica directa: a₁, a₂, q₁, q₂ → x, y</h2>
+  <div>
+    <label for="a1">Longitud del primer braç (a₁):</label>
+    <input type="number" id="a1" value="1" step="0.1"><br><br>
 
-  <label for="a2">Longitud del segon braç (a₂):</label>
-  <input type="number" id="a2" value="0.5" step="0.1"><br><br>
+    <label for="a2">Longitud del segon braç (a₂):</label>
+    <input type="number" id="a2" value="0.5" step="0.1"><br><br>
 
-  <label for="x">Coordenada X de l'extrem:</label>
-  <input type="number" id="x" value="1" step="0.1"><br><br>
+    <label for="q1">Angle del primer braç (q₁, en graus):</label>
+    <input type="number" id="q1" value="45" step="0.1"><br><br>
 
-  <label for="y">Coordenada Y de l'extrem:</label>
-  <input type="number" id="y" value="0.5" step="0.1"><br><br>
+    <label for="q2">Angle del segon braç (q₂, en graus):</label>
+    <input type="number" id="q2" value="30" step="0.1"><br><br>
 
-  <button onclick="calculateInverseKinematics()">Calcula els angles</button>
-</div>
+    <button onclick="calculatePosition()">Calcula la posició</button>
+  </div>
 
-<div id="output"></div>
-<canvas id="robotCanvas" width="400" height="400"></canvas>
+  <hr>
+
+  <h2>Cinemàtica inversa: a₁, a₂, x, y → q₁, q₂</h2>
+  <div>
+    <label for="a1_inv">Longitud del primer braç (a₁):</label>
+    <input type="number" id="a1_inv" value="1" step="0.1"><br><br>
+
+    <label for="a2_inv">Longitud del segon braç (a₂):</label>
+    <input type="number" id="a2_inv" value="0.5" step="0.1"><br><br>
+
+    <label for="x_pos">Posició x:</label>
+    <input type="number" id="x_pos" value="1" step="0.01"><br><br>
+
+    <label for="y_pos">Posició y:</label>
+    <input type="number" id="y_pos" value="1" step="0.01"><br><br>
+
+    <button onclick="calculateInverseKinematics()">Calcula els angles</button>
+  </div>
+
+  <div id="output"></div>
+  <canvas id="robotCanvas" width="400" height="400"></canvas>
 
 <script>
-function calculateInverseKinematics() {
-  // Llegir dades
+function calculatePosition() {
   let a1 = parseFloat(document.getElementById('a1').value);
   let a2 = parseFloat(document.getElementById('a2').value);
-  let x = parseFloat(document.getElementById('x').value);
-  let y = parseFloat(document.getElementById('y').value);
+  let q1_deg = parseFloat(document.getElementById('q1').value);
+  let q2_deg = parseFloat(document.getElementById('q2').value);
+  let q1 = q1_deg * Math.PI / 180;
+  let q2 = q2_deg * Math.PI / 180;
 
-  // Mostrar resultats i canvas
   document.getElementById('output').style.display = 'block';
   document.getElementById('robotCanvas').style.display = 'block';
 
-  // Distància a l'objectiu
-  let r2 = x*x + y*y;
-  let r = Math.sqrt(r2);
+  let output = "<div class='equation'>Les equacions per calcular la posició final del robot són:</div>";
+  output += "<div class='equation'>\\[ x = a_1 \\cos(q_1) + a_2 \\cos(q_1 + q_2) \\]</div>";
+  output += "<div class='equation'>\\[ y = a_1 \\sin(q_1) + a_2 \\sin(q_1 + q_2) \\]</div>";
+  output += "<div class='equation'>Substituïm els valors:</div>";
+  output += `<div class='equation'>\\[ x = ${a1} \\cos(${q1_deg}°) + ${a2} \\cos(${q1_deg}° + ${q2_deg}°) \\]</div>`;
+  output += `<div class='equation'>\\[ y = ${a1} \\sin(${q1_deg}°) + ${a2} \\sin(${q1_deg}° + ${q2_deg}°) \\]</div>`;
 
-  // Comprovació de si és assolible
-  if (r > a1 + a2 || r < Math.abs(a1 - a2)) {
-    document.getElementById('output').innerHTML = "<p style='color:red'>Objectiu inassolible</p>";
-    return;
-  }
+  let x1 = a1 * Math.cos(q1);
+  let x2 = a2 * Math.cos(q1 + q2);
+  let y1 = a1 * Math.sin(q1);
+  let y2 = a2 * Math.sin(q1 + q2);
 
-  // Angle q2 amb la llei dels cosinus
-  let cos_q2 = (r2 - a1*a1 - a2*a2) / (2 * a1 * a2);
-  let q2 = Math.acos(cos_q2);
-  let q2_alt = -q2; // Segona solució (colze amunt/avall)
+  output += "<div class='equation'>Desglossant els càlculs:</div>";
+  output += `<div class='equation'>\\[ x_1 = a_1 \\cos(q_1) = ${a1} \\times \\cos(${q1_deg}°) = ${x1.toFixed(2)} \\]</div>`;
+  output += `<div class='equation'>\\[ x_2 = a_2 \\cos(q_1 + q_2) = ${a2} \\times \\cos(${q1_deg}° + ${q2_deg}°) = ${x2.toFixed(2)} \\]</div>`;
+  output += `<div class='equation'>\\[ y_1 = a_1 \\sin(q_1) = ${a1} \\times \\sin(${q1_deg}°) = ${y1.toFixed(2)} \\]</div>`;
+  output += `<div class='equation'>\\[ y_2 = a_2 \\sin(q_1 + q_2) = ${a2} \\times \\sin(${q1_deg}° + ${q2_deg}°) = ${y2.toFixed(2)} \\]</div>`;
 
-  // Angle q1
-  function calcQ1(q2_val) {
-    return Math.atan2(y, x) - Math.atan2(a2 * Math.sin(q2_val), a1 + a2 * Math.cos(q2_val));
-  }
-  let q1 = calcQ1(q2);
-  let q1_alt = calcQ1(q2_alt);
+  let x = x1 + x2;
+  let y = y1 + y2;
 
-  // Convertir a graus
-  let q1_deg = q1 * 180 / Math.PI;
-  let q2_deg = q2 * 180 / Math.PI;
-  let q1_alt_deg = q1_alt * 180 / Math.PI;
-  let q2_alt_deg = q2_alt * 180 / Math.PI;
+  output += "<div class='equation'>Calculant els resultats numèrics totals:</div>";
+  output += `<div class='equation'>\\[ x = ${x.toFixed(2)} \\]</div>`;
+  output += `<div class='equation'>\\[ y = ${y.toFixed(2)} \\]</div>`;
 
-  // Mostrar resultats
-  let output = "<div class='equation'>Resultats de la cinemàtica inversa (en graus):</div>";
-  output += `<div class='equation'>Solució 1: q₁ = ${q1_deg.toFixed(2)}°, q₂ = ${q2_deg.toFixed(2)}°</div>`;
-  output += `<div class='equation'>Solució 2: q₁ = ${q1_alt_deg.toFixed(2)}°, q₂ = ${q2_alt_deg.toFixed(2)}°</div>`;
   document.getElementById('output').innerHTML = output;
   MathJax.typeset();
 
-  // Dibuixar robot amb la primera solució
+  drawRobot(a1, a2, q1, q2);
+}
+
+function calculateInverseKinematics() {
+  let a1 = parseFloat(document.getElementById('a1_inv').value);
+  let a2 = parseFloat(document.getElementById('a2_inv').value);
+  let x = parseFloat(document.getElementById('x_pos').value);
+  let y = parseFloat(document.getElementById('y_pos').value);
+
+  document.getElementById('output').style.display = 'block';
+  document.getElementById('robotCanvas').style.display = 'block';
+
+  let output = "<div class='equation'>Les fórmules per a la cinemàtica inversa són:</div>";
+  output += `<div class='equation'>\\[ \\cos(q_2) = \\frac{x^2 + y^2 - a_1^2 - a_2^2}{2 a_1 a_2} = \\frac{${x}^2 + ${y}^2 - ${a1}^2 - ${a2}^2}{2 \\times ${a1} \\times ${a2}} \\]</div>`;
+
+  // Calcula cos(q2)
+  let c2 = (x*x + y*y - a1*a1 - a2*a2) / (2 * a1 * a2);
+
+  if (c2 < -1 || c2 > 1) {
+    output += `<div class='equation' style="color:red;">Posició fora de l'abast del robot! (\\cos(q_2) = ${c2.toFixed(2)})</div>`;
+    document.getElementById('output').innerHTML = output;
+    MathJax.typeset();
+    return;
+  }
+
+  let q2 = Math.acos(c2);
+
+  output += `<div class='equation'>\\[ q_2 = \\arccos(${c2.toFixed(4)}) = ${(q2 * 180/Math.PI).toFixed(2)}° \\]</div>`;
+
+  let k1 = a1 + a2 * Math.cos(q2);
+  let k2 = a2 * Math.sin(q2);
+
+  output += `<div class='equation'>\\[ k_1 = a_1 + a_2 \\cos(q_2) = ${a1} + ${a2} \\times \\cos(${(q2 * 180/Math.PI).toFixed(2)}°) = ${k1.toFixed(2)} \\]</div>`;
+  output += `<div class='equation'>\\[ k_2 = a_2 \\sin(q_2) = ${a2} \\times \\sin(${(q2 * 180/Math.PI).toFixed(2)}°) = ${k2.toFixed(2)} \\]</div>`;
+
+  let q1 = Math.atan2(y, x) - Math.atan2(k2, k1);
+
+  // Convertir a graus i ajustar rang [0, 360)
+  let q1_deg = (q1 * 180 / Math.PI);
+  let q2_deg = (q2 * 180 / Math.PI);
+
+  // Ajustar angles perquè siguin positius (opcional)
+  if (q1_deg < 0) q1_deg += 360;
+  if (q2_deg < 0) q2_deg += 360;
+
+  output += `<div class='equation'>\\[ q_1 = \\arctan2(y, x) - \\arctan2(k_2, k_1) = ${q1_deg.toFixed(2)}° \\]</div>`;
+  output += `<div class='equation'>\\[ q_2 = ${(q2_deg).toFixed(2)}° \\]</div>`;
+
+  document.getElementById('output').innerHTML = output;
+  MathJax.typeset();
+
+  // Actualitzar inputs de la cinemàtica directa per poder veure el resultat
+  document.getElementById('a1').value = a1;
+  document.getElementById('a2').value = a2;
+  document.getElementById('q1').value = q1_deg.toFixed(2);
+  document.getElementById('q2').value = q2_deg.toFixed(2);
+
   drawRobot(a1, a2, q1, q2);
 }
 
 function drawRobot(a1, a2, q1, q2) {
   let canvas = document.getElementById('robotCanvas');
   let ctx = canvas.getContext('2d');
+
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
   let centerX = canvas.width / 2;
   let centerY = canvas.height / 2;
   let scale = 80;
 
-  // Coordenades dels extrems
   let x1 = a1 * Math.cos(q1);
   let y1 = a1 * Math.sin(q1);
   let x2 = x1 + a2 * Math.cos(q1 + q2);
@@ -124,11 +205,21 @@ function drawRobot(a1, a2, q1, q2) {
   ctx.lineWidth = 5;
   ctx.stroke();
 
-  // Punts
+  // Cercles extrems
+  ctx.beginPath();
+  ctx.arc(centerX, centerY, 5, 0, 2 * Math.PI);
   ctx.fillStyle = 'red';
-  ctx.beginPath(); ctx.arc(centerX, centerY, 5, 0, 2*Math.PI); ctx.fill();
-  ctx.beginPath(); ctx.arc(x1_screen, y1_screen, 5, 0, 2*Math.PI); ctx.fill();
-  ctx.beginPath(); ctx.arc(x2_screen, y2_screen, 5, 0, 2*Math.PI); ctx.fill();
+  ctx.fill();
+
+  ctx.beginPath();
+  ctx.arc(x1_screen, y1_screen, 5, 0, 2 * Math.PI);
+  ctx.fillStyle = 'red';
+  ctx.fill();
+
+  ctx.beginPath();
+  ctx.arc(x2_screen, y2_screen, 5, 0, 2 * Math.PI);
+  ctx.fillStyle = 'red';
+  ctx.fill();
 }
 </script>
 
