@@ -65,13 +65,21 @@
 
         /* ===== BASIC LAYOUT ===== */
         *{box-sizing:border-box} 
-        /* L'asterisc * és un selector universal, per exemple si jo vull buscar un docuemnt i no m'en recordo del seu nom poso "*.docx" */
+        /* L'asterisc * és un selector universal, per exemple si jo vull buscar un docuemnt i no m'en recordo del seu nom poso "*.docx" i apareixen tots els documents.
+        Si poso "*.js" buscara tots els documents que tenen js(javascript). Posar un asterisc afecta a totes les etiquetes html.
+        La propietat box-sizing cobtrola com es calcula l'amplada i l'alçada d'un element, concretament si el padding i el border s'inclouen dins 
+        de la mida o no. En el cas borderbox, que es el valor de la propietat box-sizing, l'amplada i l'alçada de tots els elements inclouen el border
+        i el padding, en canvi si en comptes de border-bix posés content-box ñ'amplada total seria és gran i hauries de sumar el padding i el bordr.
+        És més fàcil per un disenyador perque pot fer border-box perquè té en comte totes les mides, i apliques el box mode. */
         html,body{
             height:100%;
             margin:0;
             padding:0;
             font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            /*Els font-family és l'ordre en que busca les fonts de lletra, ja que si no troba la primera pasa a la segona i aixi fins al final, que si no troba 
+            posa sans-serif. Es a sir la prioritat del tipus de lletra*/
             background: linear-gradient(135deg,#f5f7fa 0%, #d8e1ef 100%);
+            /* linear-gradient fa una transició de color de fons, aquesta és un degradat suau ja que hi ha poca diferencia entre les lletres en l'abecedari.*/
             color:#222;
         }
 
