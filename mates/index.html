@@ -1,11 +1,10 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="ca">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Calculadora de Estadística Avanzada</title>
+<title>Calculadora Estadística Avançada</title>
 
-<!-- MathJax -->
 <script>
 window.MathJax = {
     tex: {
@@ -24,12 +23,8 @@ window.MathJax = {
     --secondary:#3498db;
     --accent:#e74c3c;
     --light:#f8f9fa;
-    --muted:#7f8c8d;
-    --success:#27ae60;
-    --card-bg:#fff;
     --shadow:0 6px 18px rgba(0,0,0,0.08);
     --radius:12px;
-    --mono:monospace;
 }
 
 *{box-sizing:border-box}
@@ -37,7 +32,6 @@ body{
     margin:0;
     font-family:Segoe UI;
     background:linear-gradient(135deg,#eef2f7,#d9e4f5);
-    color:#222;
 }
 
 .app{max-width:1100px;margin:20px auto;padding:20px}
@@ -47,7 +41,6 @@ header{
     color:#fff;
     padding:20px;
     border-radius:var(--radius);
-    box-shadow:var(--shadow);
 }
 
 .grid{
@@ -59,84 +52,61 @@ header{
 @media(max-width:900px){.grid{grid-template-columns:1fr}}
 
 .card{
-    background:var(--card-bg);
+    background:#fff;
     padding:18px;
     border-radius:var(--radius);
     box-shadow:var(--shadow);
 }
 
-.section-title{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.section-title{display:flex;gap:10px;align-items:center}
 .section-title .dot{width:10px;height:25px;background:var(--secondary);border-radius:4px}
 
-input,button{
+button{
     padding:8px;
     border-radius:8px;
-    border:1px solid #ddd;
-}
-
-button{
-    cursor:pointer;
+    border:0;
     background:var(--secondary);
     color:#fff;
     font-weight:700;
-}
-button:hover{opacity:0.9}
-
-.table{
-    width:100%;
-    border-collapse:collapse;
-    margin-top:10px;
-}
-.table th,.table td{
-    border:1px solid #ddd;
-    padding:6px;
-    text-align:center;
+    cursor:pointer;
+    margin:4px 0;
 }
 
-.step{
-    margin-top:10px;
-    padding:10px;
-    border-radius:10px;
-    background:#f7f9fc;
-    border:1px solid #e5ecf3;
-}
-
-.toggle{
-    background:var(--primary);
-    margin-top:8px;
-}
-
-.hidden{display:none}
+table{width:100%;border-collapse:collapse;margin-top:10px}
+td,th{border:1px solid #ddd;padding:6px;text-align:center}
 
 .result{
     margin-top:10px;
     padding:10px;
     background:var(--light);
     border-left:4px solid var(--secondary);
-    border-radius:8px;
 }
 
-.value{font-weight:700;color:var(--accent)}
+.value{color:var(--accent);font-weight:700}
+
+.hidden{display:none}
+.step{background:#f7f9fc;padding:10px;margin-top:10px;border-radius:10px}
 </style>
 </head>
 
 <body>
+
 <div class="app">
 <header>
-    <h1>Calculadora Estadística Avanzada</h1>
-    <p>Media, mediana, moda, rango, varianza, desviación típica y frecuencias</p>
+<h1>Calculadora Estadística Avançada</h1>
+<p>Tot el procés detallat: mitjana, mediana, moda, variància i desviació típica</p>
 </header>
 
 <div class="grid">
 
 <!-- INPUT -->
 <div class="card">
-    <div class="section-title"><div class="dot"></div><h3>Tabla de datos</h3></div>
+    <div class="section-title"><div class="dot"></div><h3>Dades</h3></div>
 
-    <button onclick="addRow()">Añadir fila</button>
+    <button onclick="addRow()">Afegir fila</button>
     <button onclick="calculate()">Calcular</button>
 
-    <table class="table" id="t">
+    <table>
         <thead>
             <tr>
                 <th>xi</th>
@@ -152,15 +122,15 @@ button:hover{opacity:0.9}
 
 <!-- OUTPUT -->
 <div class="card">
-    <div class="section-title"><div class="dot"></div><h3>Resultados</h3></div>
+    <div class="section-title"><div class="dot"></div><h3>Resultats</h3></div>
     <div id="out"></div>
-    <button class="toggle" onclick="toggleSteps()">Mostrar/Ocultar procesos</button>
 </div>
 
 </div>
 </div>
 
 <script>
+
 function addRow(){
     let tr=document.createElement("tr");
     tr.innerHTML=`
@@ -173,18 +143,27 @@ function addRow(){
 }
 
 function calculate(){
+
     let xi=[...document.querySelectorAll(".xi")].map(e=>+e.value);
     let fi=[...document.querySelectorAll(".fi")].map(e=>+e.value);
 
-    let N=fi.reduce((a,b)=>a+b,0);
+    let N = fi.reduce((a,b)=>a+b,0);
 
-    let Fi=0,Hi=0;
+    let Fi=0, Hi=0;
     let data=[];
+    let sum_xifi=0;
+    let sum_xi2fi=0;
+
+    let freqTable="";
 
     for(let i=0;i<xi.length;i++){
-        let hi=fi[i]/N;
-        Fi+=fi[i];
-        Hi+=hi;
+
+        let hi = fi[i]/N;
+        Fi += fi[i];
+        Hi += hi;
+
+        sum_xifi += xi[i]*fi[i];
+        sum_xi2fi += Math.pow(xi[i],2)*fi[i];
 
         document.getElementsByClassName("hi")[i].innerText=hi.toFixed(3);
         document.getElementsByClassName("Fi")[i].innerText=Fi;
@@ -193,38 +172,88 @@ function calculate(){
         for(let j=0;j<fi[i];j++) data.push(xi[i]);
     }
 
-    let mean=data.reduce((a,b)=>a+b,0)/N;
+    let mean = sum_xifi / N;
+
     let sorted=[...data].sort((a,b)=>a-b);
-    let med=sorted.length%2?sorted[Math.floor(N/2)]: (sorted[N/2-1]+sorted[N/2])/2;
 
-    let moda=xi[fi.indexOf(Math.max(...fi))];
-    let rango=Math.max(...data)-Math.min(...data);
+    let med = (sorted.length%2)
+        ? sorted[Math.floor(N/2)]
+        : (sorted[N/2-1]+sorted[N/2])/2;
 
-    let varianza=data.reduce((a,b)=>a+Math.pow(b-mean,2),0)/N;
-    let desv=Math.sqrt(varianza);
+    let moda = xi[fi.indexOf(Math.max(...fi))];
+
+    let rango = Math.max(...data)-Math.min(...data);
+
+    let varianza = sum_xi2fi/N - Math.pow(mean,2);
+    let desv = Math.sqrt(varianza);
+
+    // TAULA EXPLICATIVA
+    for(let i=0;i<xi.length;i++){
+        freqTable += `
+        <tr>
+            <td>${xi[i]}</td>
+            <td>${fi[i]}</td>
+            <td>${(xi[i]*fi[i]).toFixed(2)}</td>
+            <td>${(Math.pow(xi[i],2)*fi[i]).toFixed(2)}</td>
+        </tr>`;
+    }
 
     document.getElementById("out").innerHTML=`
-    <div class="step">
-        Media = <span class="value">${mean.toFixed(3)}</span><br>
+
+    <div class="result">
+        <h3>📊 Resultats finals</h3>
+        Mitjana = <span class="value">${mean.toFixed(4)}</span><br>
         Mediana = <span class="value">${med}</span><br>
         Moda = <span class="value">${moda}</span><br>
-        Rango = <span class="value">${rango}</span><br>
-        Varianza = <span class="value">${varianza.toFixed(3)}</span><br>
-        Desviación típica = <span class="value">${desv.toFixed(3)}</span>
+        Rang = <span class="value">${rango}</span><br>
+        Variància = <span class="value">${varianza.toFixed(4)}</span><br>
+        Desviació típica = <span class="value">${desv.toFixed(4)}</span>
     </div>
 
-    <div id="steps" class="hidden step">
-        <h4>Proceso</h4>
-        N = ${N}<br>
-        Media = Σ(xi·fi)/N = ${mean.toFixed(3)}
-    </div>`;
+    <div class="step">
+        <h3>📌 Taula de càlculs</h3>
+        <table>
+            <tr>
+                <th>xi</th>
+                <th>fi</th>
+                <th>xi·fi</th>
+                <th>xi²·fi</th>
+            </tr>
+            ${freqTable}
+        </table>
+    </div>
+
+    <div class="step">
+        <h3>🧮 Desenvolupament de la mitjana</h3>
+        Σfi = ${N}<br>
+        Σ(xi·fi) = ${sum_xifi.toFixed(4)}<br>
+        $$ \\bar{x} = \\frac{\\sum x_i f_i}{N} = ${mean.toFixed(4)} $$
+    </div>
+
+    <div class="step">
+        <h3>📉 Desenvolupament de la variància</h3>
+        Σ(xi²·fi) = ${sum_xi2fi.toFixed(4)}<br>
+        $$ \\sigma^2 = \\frac{\\sum x_i^2 f_i}{N} - \\bar{x}^2 $$<br>
+        $$ \\sigma^2 = ${varianza.toFixed(4)} $$
+    </div>
+
+    <div class="step">
+        <h3>📌 Dades ordenades</h3>
+        ${sorted.join(", ")}
+    </div>
+
+    <div class="step">
+        <h3>📍 Mediana explicada</h3>
+        Nombre de dades = ${N}<br>
+        Posició mediana = ${Math.floor(N/2)}
+    </div>
+
+    `;
 
     MathJax.typeset();
 }
 
-function toggleSteps(){
-    document.getElementById("steps").classList.toggle("hidden");
-}
 </script>
+
 </body>
 </html>
