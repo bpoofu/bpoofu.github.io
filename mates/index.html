@@ -144,116 +144,180 @@ function addRow(){
 
 function calculate(){
 
-    let xi=[...document.querySelectorAll(".xi")].map(e=>+e.value);
-    let fi=[...document.querySelectorAll(".fi")].map(e=>+e.value);
+  document.getElementById("out").innerHTML=`
 
-    let N = fi.reduce((a,b)=>a+b,0);
+<div class="result">
+    <h3>📊 Resultats finals</h3>
+    Mitjana = <span class="value">${mean.toFixed(6)}</span><br>
+    Mediana = <span class="value">${med}</span><br>
+    Moda = <span class="value">${moda}</span><br>
+    Rang = <span class="value">${rango}</span><br>
+    Variància = <span class="value">${varianza.toFixed(6)}</span><br>
+    Desviació típica = <span class="value">${desv.toFixed(6)}</span>
+</div>
 
-    let Fi=0, Hi=0;
-    let data=[];
-    let sum_xifi=0;
-    let sum_xi2fi=0;
+<div class="step">
+<h3>🧮 Desenvolupament COMPLET de Σ(xi·fi)</h3>
+$$
+\\sum x_i f_i = 
+${xi.map((v,i)=>`${v}\\cdot${fi[i]}`).join(" + ")}
+$$
 
-    let freqTable="";
+$$
+\\sum x_i f_i = ${sum_xifi.toFixed(6)}
+$$
+</div>
 
-    for(let i=0;i<xi.length;i++){
+<div class="step">
+<h3>🧮 Desenvolupament fila per fila</h3>
+${xi.map((v,i)=>`
+$$ x_{${i+1}} f_{${i+1}} = ${v}\\cdot${fi[i]} = ${(v*fi[i]).toFixed(4)} $$`
+).join("")}
+</div>
 
-        let hi = fi[i]/N;
-        Fi += fi[i];
-        Hi += hi;
+<div class="step">
+<h3>📐 Desenvolupament de Σ(xi²·fi)</h3>
 
-        sum_xifi += xi[i]*fi[i];
-        sum_xi2fi += Math.pow(xi[i],2)*fi[i];
+$$
+\\sum x_i^2 f_i =
+${xi.map((v,i)=>`(${v}^2)\\cdot${fi[i]}`).join(" + ")}
+$$
 
-        document.getElementsByClassName("hi")[i].innerText=hi.toFixed(3);
-        document.getElementsByClassName("Fi")[i].innerText=Fi;
-        document.getElementsByClassName("Hi")[i].innerText=Hi.toFixed(3);
+$$
+\\sum x_i^2 f_i = ${sum_xi2fi.toFixed(6)}
+$$
+</div>
 
-        for(let j=0;j<fi[i];j++) data.push(xi[i]);
-    }
+<div class="step">
+<h3>📐 Detall complet de xi²·fi</h3>
 
-    let mean = sum_xifi / N;
+${xi.map((v,i)=>`
+$$ ${v}^2 = ${v*v} \\quad \\Rightarrow \\quad ${v*v}\\cdot${fi[i]} = ${(v*v*fi[i]).toFixed(4)} $$`
+).join("")}
+</div>
 
-    let sorted=[...data].sort((a,b)=>a-b);
+<div class="step">
+<h3>📊 Fórmula de la mitjana</h3>
 
-    let med = (sorted.length%2)
-        ? sorted[Math.floor(N/2)]
-        : (sorted[N/2-1]+sorted[N/2])/2;
+$$
+\\bar{x} = \\frac{\\sum x_i f_i}{N}
+$$
 
-    let moda = xi[fi.indexOf(Math.max(...fi))];
+$$
+\\bar{x} = \\frac{${sum_xifi.toFixed(6)}}{${N}} = ${mean.toFixed(6)}
+$$
+</div>
 
-    let rango = Math.max(...data)-Math.min(...data);
+<div class="step">
+<h3>📉 Variància (3 formes diferents)</h3>
 
-    let varianza = sum_xi2fi/N - Math.pow(mean,2);
-    let desv = Math.sqrt(varianza);
+$$
+\\sigma^2 = \\frac{\\sum x_i^2 f_i}{N} - \\bar{x}^2
+$$
 
-    // TAULA EXPLICATIVA
-    for(let i=0;i<xi.length;i++){
-        freqTable += `
-        <tr>
-            <td>${xi[i]}</td>
-            <td>${fi[i]}</td>
-            <td>${(xi[i]*fi[i]).toFixed(2)}</td>
-            <td>${(Math.pow(xi[i],2)*fi[i]).toFixed(2)}</td>
-        </tr>`;
-    }
+Substitució:
 
-    document.getElementById("out").innerHTML=`
+$$
+\\sigma^2 = \\frac{${sum_xi2fi.toFixed(6)}}{${N}} - (${mean.toFixed(6)})^2
+$$
 
-    <div class="result">
-        <h3>📊 Resultats finals</h3>
-        Mitjana = <span class="value">${mean.toFixed(4)}</span><br>
-        Mediana = <span class="value">${med}</span><br>
-        Moda = <span class="value">${moda}</span><br>
-        Rang = <span class="value">${rango}</span><br>
-        Variància = <span class="value">${varianza.toFixed(4)}</span><br>
-        Desviació típica = <span class="value">${desv.toFixed(4)}</span>
-    </div>
+$$
+\\sigma^2 = ${(sum_xi2fi/N).toFixed(6)} - ${(mean*mean).toFixed(6)}
+$$
 
-    <div class="step">
-        <h3>📌 Taula de càlculs</h3>
-        <table>
-            <tr>
-                <th>xi</th>
-                <th>fi</th>
-                <th>xi·fi</th>
-                <th>xi²·fi</th>
-            </tr>
-            ${freqTable}
-        </table>
-    </div>
+$$
+\\sigma^2 = ${varianza.toFixed(6)}
+$$
+</div>
 
-    <div class="step">
-        <h3>🧮 Desenvolupament de la mitjana</h3>
-        Σfi = ${N}<br>
-        Σ(xi·fi) = ${sum_xifi.toFixed(4)}<br>
-        $$ \\bar{x} = \\frac{\\sum x_i f_i}{N} = ${mean.toFixed(4)} $$
-    </div>
+<div class="step">
+<h3>📉 Forma alternativa (comprovació)</h3>
 
-    <div class="step">
-        <h3>📉 Desenvolupament de la variància</h3>
-        Σ(xi²·fi) = ${sum_xi2fi.toFixed(4)}<br>
-        $$ \\sigma^2 = \\frac{\\sum x_i^2 f_i}{N} - \\bar{x}^2 $$<br>
-        $$ \\sigma^2 = ${varianza.toFixed(4)} $$
-    </div>
+$$
+\\sigma^2 = \\frac{\\sum f_i (x_i - \\bar{x})^2}{N}
+$$
 
-    <div class="step">
-        <h3>📌 Dades ordenades</h3>
-        ${sorted.join(", ")}
-    </div>
+${xi.map((v,i)=>`
+$$ (${v} - ${mean.toFixed(4)})^2 \\cdot ${fi[i]} $$`
+).join("")}
 
-    <div class="step">
-        <h3>📍 Mediana explicada</h3>
-        Nombre de dades = ${N}<br>
-        Posició mediana = ${Math.floor(N/2)}
-    </div>
+$$
+\\sigma^2 = ${varianza.toFixed(6)}
+$$
+</div>
 
-    `;
+<div class="step">
+<h3>📏 Desviació típica</h3>
 
-    MathJax.typeset();
-}
+$$
+\\sigma = \\sqrt{\\sigma^2}
+$$
 
-</script>
+$$
+\\sigma = \\sqrt{${varianza.toFixed(6)}} = ${desv.toFixed(6)}
+$$
+</div>
 
-</body>
-</html>
+<div class="step">
+<h3>📌 Mediana (procés complet)</h3>
+
+$$
+N = ${N}
+$$
+
+$$
+Posició = \\frac{N}{2} = ${N/2}
+$$
+
+Dades ordenades:
+
+$$
+${sorted.join(", ")}
+$$
+
+Mediana = ${med}
+</div>
+
+<div class="step">
+<h3>📊 Freqüències relatives</h3>
+
+${xi.map((v,i)=>`
+$$ h_${i+1} = \\frac{${fi[i]}}{${N}} = ${(fi[i]/N).toFixed(6)} $$`
+).join("")}
+</div>
+
+<div class="step">
+<h3>📈 Interpretació estadística</h3>
+
+$$
+\\text{La mitjana representa el centre de les dades}
+$$
+
+$$
+\\text{La variància mesura la dispersió respecte la mitjana}
+$$
+
+$$
+\\text{La desviació típica és la dispersió en unitats originals}
+$$
+</div>
+
+<div class="step">
+<h3>🧠 Comprovació final</h3>
+
+$$
+\\bar{x}^2 = ${(mean*mean).toFixed(6)}
+$$
+
+$$
+\\frac{\\sum x_i^2 f_i}{N} = ${(sum_xi2fi/N).toFixed(6)}
+$$
+
+$$
+\\text{Diferència} = ${varianza.toFixed(6)}
+$$
+</div>
+
+`;
+
+MathJax.typeset();
