@@ -1,113 +1,230 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<title>Medidas de Centralización</title>
-<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-<script id="MathJax-script" async
- src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Calculadora de Estadística Avanzada</title>
+
+<!-- MathJax -->
+<script>
+window.MathJax = {
+    tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']],
+        processEscapes: true
+    },
+    svg: { fontCache: 'global' }
+};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+
 <style>
-body { font-family: Arial; padding: 20px; }
-table { border-collapse: collapse; margin-top: 10px; }
-th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
-button { margin: 5px; padding: 8px 12px; }
-.result { margin-top: 20px; }
+:root{
+    --primary:#2c3e50;
+    --secondary:#3498db;
+    --accent:#e74c3c;
+    --light:#f8f9fa;
+    --muted:#7f8c8d;
+    --success:#27ae60;
+    --card-bg:#fff;
+    --shadow:0 6px 18px rgba(0,0,0,0.08);
+    --radius:12px;
+    --mono:monospace;
+}
+
+*{box-sizing:border-box}
+body{
+    margin:0;
+    font-family:Segoe UI;
+    background:linear-gradient(135deg,#eef2f7,#d9e4f5);
+    color:#222;
+}
+
+.app{max-width:1100px;margin:20px auto;padding:20px}
+
+header{
+    background:linear-gradient(90deg,var(--primary),#1f2d3a);
+    color:#fff;
+    padding:20px;
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+}
+
+.grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:18px;
+    margin-top:20px;
+}
+@media(max-width:900px){.grid{grid-template-columns:1fr}}
+
+.card{
+    background:var(--card-bg);
+    padding:18px;
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+}
+
+.section-title{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.section-title .dot{width:10px;height:25px;background:var(--secondary);border-radius:4px}
+
+input,button{
+    padding:8px;
+    border-radius:8px;
+    border:1px solid #ddd;
+}
+
+button{
+    cursor:pointer;
+    background:var(--secondary);
+    color:#fff;
+    font-weight:700;
+}
+button:hover{opacity:0.9}
+
+.table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:10px;
+}
+.table th,.table td{
+    border:1px solid #ddd;
+    padding:6px;
+    text-align:center;
+}
+
+.step{
+    margin-top:10px;
+    padding:10px;
+    border-radius:10px;
+    background:#f7f9fc;
+    border:1px solid #e5ecf3;
+}
+
+.toggle{
+    background:var(--primary);
+    margin-top:8px;
+}
+
+.hidden{display:none}
+
+.result{
+    margin-top:10px;
+    padding:10px;
+    background:var(--light);
+    border-left:4px solid var(--secondary);
+    border-radius:8px;
+}
+
+.value{font-weight:700;color:var(--accent)}
 </style>
 </head>
+
 <body>
+<div class="app">
+<header>
+    <h1>Calculadora Estadística Avanzada</h1>
+    <p>Media, mediana, moda, rango, varianza, desviación típica y frecuencias</p>
+</header>
 
-<h2>Calculadora de Medidas Estadísticas</h2>
+<div class="grid">
 
-<button onclick="addRow()">Añadir fila</button>
-<button onclick="calcular()">Calcular</button>
+<!-- INPUT -->
+<div class="card">
+    <div class="section-title"><div class="dot"></div><h3>Tabla de datos</h3></div>
 
-<table id="tabla">
-<thead>
-<tr>
-<th>xi</th>
-<th>fi</th>
-</tr>
-</thead>
-<tbody></tbody>
-</table>
+    <button onclick="addRow()">Añadir fila</button>
+    <button onclick="calculate()">Calcular</button>
 
-<div class="result" id="resultados"></div>
+    <table class="table" id="t">
+        <thead>
+            <tr>
+                <th>xi</th>
+                <th>fi</th>
+                <th>hi</th>
+                <th>Fi</th>
+                <th>Hi</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</div>
+
+<!-- OUTPUT -->
+<div class="card">
+    <div class="section-title"><div class="dot"></div><h3>Resultados</h3></div>
+    <div id="out"></div>
+    <button class="toggle" onclick="toggleSteps()">Mostrar/Ocultar procesos</button>
+</div>
+
+</div>
+</div>
 
 <script>
-function addRow() {
-  const tabla = document.querySelector("#tabla tbody");
-  const row = document.createElement("tr");
-  row.innerHTML = `
-    <td><input type="number" class="xi"></td>
-    <td><input type="number" class="fi"></td>
-  `;
-  tabla.appendChild(row);
+function addRow(){
+    let tr=document.createElement("tr");
+    tr.innerHTML=`
+    <td><input class="xi" type="number"></td>
+    <td><input class="fi" type="number"></td>
+    <td class="hi"></td>
+    <td class="Fi"></td>
+    <td class="Hi"></td>`;
+    document.querySelector("tbody").appendChild(tr);
 }
 
-function calcular() {
-  const xis = document.querySelectorAll(".xi");
-  const fis = document.querySelectorAll(".fi");
+function calculate(){
+    let xi=[...document.querySelectorAll(".xi")].map(e=>+e.value);
+    let fi=[...document.querySelectorAll(".fi")].map(e=>+e.value);
 
-  let data = [];
-  let N = 0;
+    let N=fi.reduce((a,b)=>a+b,0);
 
-  for (let i = 0; i < xis.length; i++) {
-    let xi = parseFloat(xis[i].value);
-    let fi = parseFloat(fis[i].value);
-    if (!isNaN(xi) && !isNaN(fi)) {
-      data.push({ xi, fi });
-      N += fi;
+    let Fi=0,Hi=0;
+    let data=[];
+
+    for(let i=0;i<xi.length;i++){
+        let hi=fi[i]/N;
+        Fi+=fi[i];
+        Hi+=hi;
+
+        document.getElementsByClassName("hi")[i].innerText=hi.toFixed(3);
+        document.getElementsByClassName("Fi")[i].innerText=Fi;
+        document.getElementsByClassName("Hi")[i].innerText=Hi.toFixed(3);
+
+        for(let j=0;j<fi[i];j++) data.push(xi[i]);
     }
-  }
 
-  // Media
-  let suma = data.reduce((acc, d) => acc + d.xi * d.fi, 0);
-  let media = suma / N;
+    let mean=data.reduce((a,b)=>a+b,0)/N;
+    let sorted=[...data].sort((a,b)=>a-b);
+    let med=sorted.length%2?sorted[Math.floor(N/2)]: (sorted[N/2-1]+sorted[N/2])/2;
 
-  // Datos expandido para mediana
-  let lista = [];
-  data.forEach(d => {
-    for (let i = 0; i < d.fi; i++) lista.push(d.xi);
-  });
-  lista.sort((a,b)=>a-b);
+    let moda=xi[fi.indexOf(Math.max(...fi))];
+    let rango=Math.max(...data)-Math.min(...data);
 
-  // Mediana
-  let mediana;
-  let mid = Math.floor(lista.length / 2);
-  if (lista.length % 2 === 0) {
-    mediana = (lista[mid - 1] + lista[mid]) / 2;
-  } else {
-    mediana = lista[mid];
-  }
+    let varianza=data.reduce((a,b)=>a+Math.pow(b-mean,2),0)/N;
+    let desv=Math.sqrt(varianza);
 
-  // Moda
-  let moda = data.reduce((a,b)=> a.fi > b.fi ? a : b).xi;
+    document.getElementById("out").innerHTML=`
+    <div class="step">
+        Media = <span class="value">${mean.toFixed(3)}</span><br>
+        Mediana = <span class="value">${med}</span><br>
+        Moda = <span class="value">${moda}</span><br>
+        Rango = <span class="value">${rango}</span><br>
+        Varianza = <span class="value">${varianza.toFixed(3)}</span><br>
+        Desviación típica = <span class="value">${desv.toFixed(3)}</span>
+    </div>
 
-  // Rango
-  let rango = Math.max(...lista) - Math.min(...lista);
+    <div id="steps" class="hidden step">
+        <h4>Proceso</h4>
+        N = ${N}<br>
+        Media = Σ(xi·fi)/N = ${mean.toFixed(3)}
+    </div>`;
 
-  // Desviación media
-  let desvMedia = data.reduce((acc,d)=> acc + d.fi * Math.abs(d.xi - media),0)/N;
+    MathJax.typeset();
+}
 
-  // Varianza
-  let varianza = data.reduce((acc,d)=> acc + d.fi * Math.pow(d.xi - media,2),0)/N;
-
-  // Desviación típica
-  let desvTipica = Math.sqrt(varianza);
-
-  document.getElementById("resultados").innerHTML = `
-    <p>\( \text{Media} = ${media.toFixed(2)} \)</p>
-    <p>\( \text{Mediana} = ${mediana} \)</p>
-    <p>\( \text{Moda} = ${moda} \)</p>
-    <p>\( \text{Rango} = ${rango} \)</p>
-    <p>\( \text{Desviación media} = ${desvMedia.toFixed(2)} \)</p>
-    <p>\( \text{Varianza} = ${varianza.toFixed(2)} \)</p>
-    <p>\( \text{Desviación típica} = ${desvTipica.toFixed(2)} \)</p>
-  `;
-
-  MathJax.typeset();
+function toggleSteps(){
+    document.getElementById("steps").classList.toggle("hidden");
 }
 </script>
-
 </body>
 </html>
