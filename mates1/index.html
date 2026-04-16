@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Calculadora Estadística Avançada</title>
+
+<script>
+window.MathJax = {
+    tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']],
+        processEscapes: true
+    },
+    svg: { fontCache: 'global' }
+};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+
+<style>
+:root{
+    --primary:#2c3e50;
+    --secondary:#3498db;
+    --accent:#e74c3c;
+    --light:#f8f9fa;
+    --shadow:0 6px 18px rgba(0,0,0,0.08);
+    --radius:12px;
+}
+
+*{box-sizing:border-box}
+body{
+    margin:0;
+    font-family:Segoe UI;
+    background:linear-gradient(135deg,#eef2f7,#d9e4f5);
+}
+
+.app{max-width:1100px;margin:20px auto;padding:20px}
+
+header{
+    background:linear-gradient(90deg,var(--primary),#1f2d3a);
+    color:#fff;
+    padding:20px;
+    border-radius:var(--radius);
+}
+
+.grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:18px;
+    margin-top:20px;
+}
+@media(max-width:900px){.grid{grid-template-columns:1fr}}
+
+.card{
+    background:#fff;
+    padding:18px;
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+}
+
+.section-title{display:flex;gap:10px;align-items:center}
+.section-title .dot{width:10px;height:25px;background:var(--secondary);border-radius:4px}
+
+button{
+    padding:8px;
+    border-radius:8px;
+    border:0;
+    background:var(--secondary);
+    color:#fff;
+    font-weight:700;
+    cursor:pointer;
+    margin:4px 0;
+}
+
+table{width:100%;border-collapse:collapse;margin-top:10px}
+td,th{border:1px solid #ddd;padding:6px;text-align:center}
+
+.result{
+    margin-top:10px;
+    padding:10px;
+    background:var(--light);
+    border-left:4px solid var(--secondary);
+}
+
+.value{color:var(--accent);font-weight:700}
+
+.step{background:#f7f9fc;padding:10px;margin-top:10px;border-radius:10px}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+<header>
+<h1>Calculadora Estadística Avançada</h1>
+<p>Tot el procés detallat: mitjana, mediana, moda, variància i desviació típica</p>
+</header>
+
+<div class="grid">
+
+<!-- INPUT -->
+<div class="card">
+    <div class="section-title"><div class="dot"></div><h3>Dades</h3></div>
+
+    <button onclick="addRow()">Afegir fila</button>
+    <button onclick="calculate()">Calcular</button>
+
+    <table>
+        <thead>
+            <tr>
+                <th>xi</th>
+                <th>fi</th>
+                <th>hi</th>
+                <th>Fi</th>
+                <th>Hi</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</div>
+
+<!-- OUTPUT -->
+<div class="card">
+    <div class="section-title"><div class="dot"></div><h3>Resultats</h3></div>
+    <div id="out"></div>
+</div>
+
+</div>
+</div>
+
+<script>
+
+function addRow(){
+    let tr = document.createElement("tr");
+    tr.innerHTML = `
+    <td><input class="xi" type="number"></td>
+    <td><input class="fi" type="number"></td>
+    <td class="hi"></td>
+    <td class="Fi"></td>
+    <td class="Hi"></td>`;
+    document.querySelector("tbody").appendChild(tr);
+}
+
+function calculate(){
+
+    let xiInputs = document.querySelectorAll(".xi");
+    let fiInputs = document.querySelectorAll(".fi");
+
+    let xi = [];
+    let fi = [];
+
+    xiInputs.forEach((inp, i) => {
+        let x = parseFloat(inp.value);
+        let f = parseFloat(fiInputs[i].value);
+
+        if (!isNaN(x) && !isNaN(f)) {
+            xi.push(x);
+            fi.push(f);
+        }
+    });
+
+    if (xi.length === 0) {
+        alert("Introdueix dades correctes");
+        return;
+    }
+
+    let N = fi.reduce((a,b)=>a+b,0);
+
+    let sum_xifi = 0;
+    let sum_xi2fi = 0;
+
+    for (let i=0;i<xi.length;i++){
+        sum_xifi += xi[i]*fi[i];
+        sum_xi2fi += xi[i]*xi[i]*fi[i];
+    }
+
+    let mean = sum_xifi / N;
+    let varianza = (sum_xi2fi / N) - (mean*mean);
+    let desv = Math.sqrt(varianza);
+
+    // expandir datos para mediana
+    let expanded = [];
+    for (let i=0;i<xi.length;i++){
+        for (let j=0;j<fi[i];j++){
+            expanded.push(xi[i]);
+        }
+    }
+
+    expanded.sort((a,b)=>a-b);
+
+    let mid = Math.floor(expanded.length/2);
+    let med;
+
+    if (expanded.length % 2 === 0) {
+        med = (expanded[mid-1] + expanded[mid]) / 2;
+    } else {
+        med = expanded[mid];
+    }
+
+    // moda
+    let freq = {};
+    xi.forEach((v,i)=>{
+        freq[v] = (freq[v]||0) + fi[i];
+    });
+
+    let moda = Object.keys(freq).reduce((a,b)=> freq[a] > freq[b] ? a : b);
+
+    let rango = Math.max(...xi) - Math.min(...xi);
+
+    // output
+    document.getElementById("out").innerHTML = `
+<div class="result">
+<h3>📊 Resultats finals</h3>
+Mitjana = <span class="value">${mean.toFixed(6)}</span><br>
+Mediana = <span class="value">${med}</span><br>
+Moda = <span class="value">${moda}</span><br>
+Rang = <span class="value">${rango}</span><br>
+Variància = <span class="value">${varianza.toFixed(6)}</span><br>
+Desviació típica = <span class="value">${desv.toFixed(6)}</span>
+</div>
+
+<div class="step">
+<h3>🧮 Σ(xi·fi)</h3>
+$$
+\\sum x_i f_i = ${xi.map((v,i)=>`${v}\\cdot${fi[i]}`).join(" + ")}
+$$
+$$
+\\sum x_i f_i = ${sum_xifi.toFixed(6)}
+$$
+</div>
+
+<div class="step">
+<h3>📐 Σ(xi²·fi)</h3>
+$$
+\\sum x_i^2 f_i = ${sum_xi2fi.toFixed(6)}
+$$
+</div>
+
+<div class="step">
+<h3>📊 Mitjana</h3>
+$$
+\\bar{x} = \\frac{${sum_xifi.toFixed(6)}}{${N}} = ${mean.toFixed(6)}
+$$
+</div>
+
+<div class="step">
+<h3>📉 Variància</h3>
+$$
+\\sigma^2 = ${varianza.toFixed(6)}
+$$
+</div>
+
+<div class="step">
+<h3>📏 Desviació típica</h3>
+$$
+\\sigma = ${desv.toFixed(6)}
+$$
+</div>
+`;
+
+    MathJax.typeset();
+}
+
+</script>
+
+</body>
+</html>
