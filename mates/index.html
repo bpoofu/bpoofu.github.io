@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Medidas de Centralización</title>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async
+ src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<style>
+body { font-family: Arial; padding: 20px; }
+table { border-collapse: collapse; margin-top: 10px; }
+th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
+button { margin: 5px; padding: 8px 12px; }
+.result { margin-top: 20px; }
+</style>
+</head>
+<body>
+
+<h2>Calculadora de Medidas Estadísticas</h2>
+
+<button onclick="addRow()">Añadir fila</button>
+<button onclick="calcular()">Calcular</button>
+
+<table id="tabla">
+<thead>
+<tr>
+<th>xi</th>
+<th>fi</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+
+<div class="result" id="resultados"></div>
+
+<script>
+function addRow() {
+  const tabla = document.querySelector("#tabla tbody");
+  const row = document.createElement("tr");
+  row.innerHTML = `
+    <td><input type="number" class="xi"></td>
+    <td><input type="number" class="fi"></td>
+  `;
+  tabla.appendChild(row);
+}
+
+function calcular() {
+  const xis = document.querySelectorAll(".xi");
+  const fis = document.querySelectorAll(".fi");
+
+  let data = [];
+  let N = 0;
+
+  for (let i = 0; i < xis.length; i++) {
+    let xi = parseFloat(xis[i].value);
+    let fi = parseFloat(fis[i].value);
+    if (!isNaN(xi) && !isNaN(fi)) {
+      data.push({ xi, fi });
+      N += fi;
+    }
+  }
+
+  // Media
+  let suma = data.reduce((acc, d) => acc + d.xi * d.fi, 0);
+  let media = suma / N;
+
+  // Datos expandido para mediana
+  let lista = [];
+  data.forEach(d => {
+    for (let i = 0; i < d.fi; i++) lista.push(d.xi);
+  });
+  lista.sort((a,b)=>a-b);
+
+  // Mediana
+  let mediana;
+  let mid = Math.floor(lista.length / 2);
+  if (lista.length % 2 === 0) {
+    mediana = (lista[mid - 1] + lista[mid]) / 2;
+  } else {
+    mediana = lista[mid];
+  }
+
+  // Moda
+  let moda = data.reduce((a,b)=> a.fi > b.fi ? a : b).xi;
+
+  // Rango
+  let rango = Math.max(...lista) - Math.min(...lista);
+
+  // Desviación media
+  let desvMedia = data.reduce((acc,d)=> acc + d.fi * Math.abs(d.xi - media),0)/N;
+
+  // Varianza
+  let varianza = data.reduce((acc,d)=> acc + d.fi * Math.pow(d.xi - media,2),0)/N;
+
+  // Desviación típica
+  let desvTipica = Math.sqrt(varianza);
+
+  document.getElementById("resultados").innerHTML = `
+    <p>\( \text{Media} = ${media.toFixed(2)} \)</p>
+    <p>\( \text{Mediana} = ${mediana} \)</p>
+    <p>\( \text{Moda} = ${moda} \)</p>
+    <p>\( \text{Rango} = ${rango} \)</p>
+    <p>\( \text{Desviación media} = ${desvMedia.toFixed(2)} \)</p>
+    <p>\( \text{Varianza} = ${varianza.toFixed(2)} \)</p>
+    <p>\( \text{Desviación típica} = ${desvTipica.toFixed(2)} \)</p>
+  `;
+
+  MathJax.typeset();
+}
+</script>
+
+</body>
+</html>
