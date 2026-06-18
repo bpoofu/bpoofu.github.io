@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulador Sorteig Champions Barça</title>
+
+<style>
+body{
+    font-family: Arial, sans-serif;
+    background:#0b1220;
+    color:white;
+    text-align:center;
+    padding:20px;
+}
+
+h1{
+    color:#ffcc00;
+}
+
+.container{
+    max-width:900px;
+    margin:auto;
+}
+
+button{
+    padding:12px 20px;
+    margin:8px;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+    font-size:16px;
+}
+
+.btn{
+    background:#004d98;
+    color:white;
+}
+
+.btn:hover{
+    background:#0066cc;
+}
+
+.resultat{
+    margin:20px auto;
+    padding:20px;
+    background:#16213e;
+    border-radius:10px;
+    font-size:24px;
+}
+
+table{
+    width:100%;
+    margin-top:20px;
+    border-collapse:collapse;
+}
+
+th, td{
+    border:1px solid #444;
+    padding:10px;
+}
+
+th{
+    background:#004d98;
+}
+
+.barra{
+    height:24px;
+    background:#ffcc00;
+    color:black;
+    text-align:right;
+    padding-right:5px;
+    border-radius:5px;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<h1>Simulador Sorteig Champions Barça</h1>
+
+<p>Escull una opció:</p>
+
+<button class="btn" onclick="sorteig()">Fer 1 sorteig</button>
+<button class="btn" onclick="simular(1000)">Simular 1.000 vegades</button>
+<button class="btn" onclick="simular(10000)">Simular 10.000 vegades</button>
+<button class="btn" onclick="simular(100000)">Simular 100.000 vegades</button>
+<button class="btn" onclick="reiniciar()">Reiniciar</button>
+
+<div class="resultat" id="resultat">
+Esperant sorteig...
+</div>
+
+<table>
+<thead>
+<tr>
+<th>Equip</th>
+<th>Vegades sortit</th>
+<th>Probabilitat</th>
+<th>Gràfic</th>
+</tr>
+</thead>
+<tbody id="taula"></tbody>
+</table>
+
+</div>
+
+<script>
+
+// SUBSTITUEIX AQUESTS EQUIPS PELS REALS
+const equips = [
+    "Arsenal",
+    "Bayern",
+    "PSG",
+    "Inter",
+    "Dortmund",
+    "Leverkusen",
+    "Liverpool",
+    "Atletico"
+];
+
+let comptador = {};
+let total = 0;
+
+equips.forEach(e => comptador[e] = 0);
+
+function sorteig(){
+
+    const rival = equips[Math.floor(Math.random()*equips.length)];
+
+    comptador[rival]++;
+    total++;
+
+    document.getElementById("resultat").innerHTML =
+        "🎯 Rival del Barça: <b>" + rival + "</b>";
+
+    actualitzarTaula();
+}
+
+function simular(n){
+
+    for(let i=0;i<n;i++){
+        const rival = equips[Math.floor(Math.random()*equips.length)];
+        comptador[rival]++;
+        total++;
+    }
+
+    document.getElementById("resultat").innerHTML =
+        "✅ Simulació completada: " + n.toLocaleString() + " sorteigs";
+
+    actualitzarTaula();
+}
+
+function actualitzarTaula(){
+
+    let html = "";
+
+    equips.forEach(equip=>{
+
+        const vegades = comptador[equip];
+
+        const probabilitat =
+            total === 0 ? 0 :
+            (vegades/total*100);
+
+        html += `
+        <tr>
+            <td>${equip}</td>
+            <td>${vegades.toLocaleString()}</td>
+            <td>${probabilitat.toFixed(2)}%</td>
+            <td>
+                <div class="barra"
+                style="width:${probabilitat}%">
+                ${probabilitat.toFixed(1)}%
+                </div>
+            </td>
+        </tr>
+        `;
+    });
+
+    document.getElementById("taula").innerHTML = html;
+}
+
+function reiniciar(){
+
+    total = 0;
+
+    equips.forEach(e => comptador[e] = 0);
+
+    document.getElementById("resultat").innerHTML =
+        "Esperant sorteig...";
+
+    actualitzarTaula();
+}
+
+actualitzarTaula();
+
+</script>
+
+</body>
+</html>
